@@ -1,9 +1,108 @@
 {{ block title }}
-    Page title
+
 {{ endblock }}
 
 {{ block content }}
+    <div class="container mt-5">
+        <div class="card">
+            <div class="card-header text-center">
+                <h2>Your Results</h2>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Description</th>
+                            <th scope="col">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Your Endowment</td>
+                            <td>{{ player.endowment }}</td>
+                        </tr>
+                        <tr>
+                            <td>Your Individual Contribution</td>
+                            <td>{{ player.contribution }}</td>
+                        </tr>
+                        <tr>
+                            <td>Total Contribution in the Common Pool</td>
+                            <td>{{ group.total_contribution }}</td>
+                        </tr>
+                        <tr>
+                            <td>Your Individual Share from the Pool</td>
+                            <td>{{ group.individual_share }}</td>
+                        </tr>
+                        <tr>
+                            <td>Your Final Payoff</td>
+                            <td>{{ player.payoff }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
+   <script src="https://code.highcharts.com/highcharts.js"></script>
+
+    <div id="contributionChart" style="width: 800px; height: 400px;"></div>
+
+    <script>
+        // Your contributions array
+        const contributions = {{ contributions|json }};
+// const contributions = [0, 2, 3, 2, 20, 10, 10];
+        const yourContribution = {{player.contribution|json}};
+        // Process the array to get frequency of each unique contribution
+        const frequency = {};
+        contributions.forEach(contribution => {
+            if (!frequency[contribution]) {
+                frequency[contribution] = 0;
+            }
+            frequency[contribution]++;
+        });
+
+        // Convert to an array of [contribution, frequency]
+        const data = Object.entries(frequency).map(([contribution, freq]) => [parseInt(contribution), freq]);
+
+        // Create the Highcharts chart
+        Highcharts.chart('contributionChart', {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: 'Distribution of Contributions'
+            },
+            xAxis: {
+                title: {
+                    text: 'Contribution Value'
+                }
+            },
+            plotOptions: {
+                column: {
+                    grouping: false
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Number of People'
+                }
+            },
+                        series: [
+                {
+                    name: 'Contributions',
+                    data: data,
+                    color: '#7cb5ec' // Default blue
+                },
+                {
+                    name: 'Your Contribution Level',
+                    data: [[yourContribution, frequency[yourContribution] || 0]],
+                    color: '#ff0000', // Red,
+                    pointPadding: 0
+                }
+            ]
+
+        });
+    </script>
     {{ next_button }}
 {{ endblock }}
 
