@@ -26,26 +26,32 @@ class Group(BaseGroup):
     total_contribution = models.CurrencyField()
     individual_share = models.CurrencyField()
 
+
 class Player(BasePlayer):
-    belief=models.CurrencyField(label='How much do you think the other participants ON AVERAGE will contribute?', min=0, max=C.ENDOWMENT)
+    belief = models.CurrencyField(label='How much do you think the other participants ON AVERAGE will contribute?',
+                                  min=0, max=C.ENDOWMENT)
     endowment = models.CurrencyField()
     contribution = models.CurrencyField(label='How much will you contribute?', min=0, max=C.ENDOWMENT)
 
 
-
 # PAGES
+
+class Intro(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+
 class Decision(Page):
     form_model = 'player'
     form_fields = ['contribution', 'belief']
 
 
-
 def set_payoffs(group: Group):
-    num_players= len(group.get_players())
+    num_players = len(group.get_players())
     group.total_contribution = sum([p.contribution for p in group.get_players()])
     group.individual_share = (group.total_contribution * C.MULTIPLIER) / num_players
     for p in group.get_players():
-
         p.payoff = p.endowment - p.contribution + group.individual_share
 
 
@@ -57,7 +63,8 @@ class Results(Page):
     def vars_for_template(self):
         return {
             'contributions': [p.contribution for p in self.group.get_players()],
+            'beliefs': [p.belief for p in self.group.get_players()],
         }
 
 
-page_sequence = [Decision, ResultsWaitPage, Results]
+page_sequence = [Intro,Decision, ResultsWaitPage, Results]
