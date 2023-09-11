@@ -28,6 +28,7 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
+
     belief = models.CurrencyField(label='How much do you think the other participants ON AVERAGE will contribute?',
                                   min=0, max=C.ENDOWMENT)
     endowment = models.CurrencyField()
